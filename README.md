@@ -179,6 +179,7 @@ vcneb keys abacus     # ABACUS: 无白名单，提示哪些键由工具代写
 images: 5
 interpolation: idpp
 align_cell: true
+tangent: improved
 min_distance: 2.0
 prune: auto
 variable_cell: true
@@ -421,6 +422,7 @@ vcneb plot ./run -o fig/band.pdf # 换输出路径/格式
 | `images` | 5 | **可动** image 数（不含两个端点，总图数 = images + 2） |
 | `interpolation` | `idpp` | `idpp`（推荐）或 `linear` |
 | `align_cell` | `true` | 插值前把末态晶胞换个写法对齐初态（§8.1） |
+| `tangent` | `improved` | 路径切向：`improved`（Henkelman–Jónsson 能量加权）或 `central`（中心差分，v0.1.0 的旧行为）。对称/直线带上两者等价 |
 | `min_distance` | 2.0 | 插值后某张图最近原子间距小于它就删掉（Å）；`0` = 关 |
 | `prune` | `auto` | `auto` 删点继续 / `error` 直接报错 / `false` 只留警告 |
 | `variable_cell` | `true` | 变胞 NEB；`false` 固定晶胞（slab、团簇建议关） |
@@ -1144,6 +1146,12 @@ Mulliken total spin moment along the path (images 0..8): 0.00  0.12  0.45 ...
 
 ## 14. 限制与注意
 
+* **切向**默认用 Henkelman–Jónsson 能量加权差分（`neb.tangent: improved`）：
+  上坡图用前向差、下坡图用后向差，平台区按能量差加权，避免带在弯折处"切角"。
+  旧的中心差分仍可选（`neb.tangent: central`），在对称/近似直线的带上两者
+  给出**完全相同**的结果（实测：LJ 34 步 / 0.0383 eV、删点后的不均匀 LJ 28 步 /
+  0.0343 eV 都一模一样；EMT Cu(111) 41 步 → 39 步，能垒 0.4435 eV 不变），
+  但在弯折带上中心差分的切向会偏，垂直力方向偏差可达 20° 以上。
 这些不是 bug，是方法的边界，写文章时要用得上。
 
 **1. 共格（coherent）能垒 ≠ 成核能垒。**

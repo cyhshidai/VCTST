@@ -124,6 +124,64 @@ def _cell_weight(cfg) -> float:
     return max(1.0, max_step / cell_max_step)
 
 
+def neb_tangent(xs, energies, i: int, mode: str = "improved") -> np.ndarray:
+    """Unit tangent of image ``i`` along the band.
+
+    ``mode="central"`` is the plain central difference ``x_{i+1} - x_{i-1}``.
+    ``mode="improved"`` is the Henkelman-Jonsson energy-weighted tangent
+    (J. Chem. Phys. 113, 9978 (2000)), the same estimator ASE uses:
+
+    * climbing (``E_{i+1} > E_i > E_{i-1}``): the forward one-sided difference,
+    * descending (``E_{i+1} < E_i < E_{i-1}``): the backward one,
+    * otherwise both one-sided differences are mixed, the one pointing at the
+      *higher* energy neighbour carrying the larger energy-difference weight.
+
+    On a straight band this reduces to the central difference; on a curved one
+    it stops the band from cutting the corner (the perpendicular force is then
+    measured against the uphill direction instead of the chord), and on an
+    unevenly spaced band the better-sampled side dominates.
+
+    Both variants return a unit vector; a degenerate band returns a zero
+    vector instead of NaN.
+    """
+    prev, cur, nxt = xs[i - 1], xs[i], xs[i + 1]
+    d_plus = nxt - cur
+    d_minus = cur - prev
+    central = nxt - prev
+
+    def _unit(v):
+        n = float(np.linalg.norm(v))
+        return None if n < 1e-12 else np.asarray(v, dtype=float) / n
+
+    if str(mode).lower() == "improved":
+        e_prev, e_cur, e_next = (float(energies[i - 1]), float(energies[i]),
+                                 float(energies[i + 1]))
+        if e_next > e_cur > e_prev:
+            tau = _unit(d_plus)
+        elif e_next < e_cur < e_prev:
+            tau = _unit(d_minus)
+        else:
+            de_next = abs(e_next - e_cur)
+            de_prev = abs(e_prev - e_cur)
+            de_max = max(de_next, de_prev)
+            de_min = min(de_next, de_prev)
+            if de_max + de_min < 1e-12:
+                tau = _unit(central)
+            elif e_next > e_prev:
+                # the forward neighbour is higher in energy: weight it more
+                tau = _unit(d_plus * de_max + d_minus * de_min)
+            else:
+                tau = _unit(d_minus * de_max + d_plus * de_min)
+        if tau is not None:
+            return tau
+
+    for candidate in (central, d_plus, d_minus):
+        tau = _unit(candidate)
+        if tau is not None:
+            return tau
+    return np.zeros_like(cur)
+
+
 def _get_idpp():
     """ase moved idpp_interpolate to ase.mep in 3.23; support both."""
     try:
@@ -692,16 +750,14 @@ class Band:
         n_cell = self.n_cell_components()
         k_spring = float(self.cfg.neb.spring_k)
         ci = ci_index
+        tan_mode = str(self.cfg.neb.get("tangent") or "improved").lower()
+        energies = [float(st.energy) for st in self.states]
         for i in range(1, n_img - 1):
             prev, nxt = xs[i - 1], xs[i + 1]
-            tau = nxt - prev
+            tau = neb_tangent(xs, energies, i, tan_mode)
             tnorm = float(np.linalg.norm(tau))
             if tnorm < 1e-12:
-                tau = xs[i] - xs[i - 1]
-                tnorm = float(np.linalg.norm(tau))
-            if tnorm < 1e-12:
                 continue
-            tau = tau / tnorm
             f = -grad[i]
             f_par = float(np.dot(f, tau))
             f_perp = f - f_par * tau

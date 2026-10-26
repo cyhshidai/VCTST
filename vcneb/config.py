@@ -52,6 +52,7 @@ DEFAULTS = {
         "images": 5,
         "interpolation": "idpp",
         "align_cell": True,
+        "tangent": "improved",  # improved (Henkelman-Jonsson) or central
         "min_distance": 2.0,
         "prune": "auto",
         "variable_cell": True,
@@ -188,6 +189,11 @@ class Config:
             problems.append("neb.max_steps must be >= 1")
         if str(self.neb.interpolation).lower() not in ("linear", "idpp"):
             problems.append("neb.interpolation must be 'linear' or 'idpp'")
+        tangent = str(self.neb.get("tangent") or "improved").strip().lower()
+        if tangent not in ("improved", "central"):
+            problems.append("neb.tangent must be 'improved' "
+                            "(Henkelman-Jonsson) or 'central'")
+        self.neb["tangent"] = tangent
         try:
             dmin = float(self.neb.min_distance or 0.0)
         except (TypeError, ValueError):
