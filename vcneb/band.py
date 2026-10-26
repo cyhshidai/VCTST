@@ -947,6 +947,7 @@ class Band:
             "n_atoms": self.n_atoms,
             "n_movable": self.n_free,
             "pruned_images": list(self.pruned),
+            "tangent": str(self.cfg.neb.get("tangent") or "improved"),
             "optimizer_dt": {str(i): float(dt) for i, dt in
                              (getattr(self, "_optimizer_dt", None) or {}).items()},
             "images": [{"cell": st.cell.tolist(), "pos": st.pos.tolist(),
@@ -1040,6 +1041,7 @@ class Band:
                 fh.write(line + "\n")
         summary = {
             "engine": self.engine.name,
+            "tangent": str(self.cfg.neb.get("tangent") or "improved"),
             "converged": bool(converged),
             "steps": self.step,
             "kpts": (list(self.engine.kpoints()) if self.engine.kpoints()

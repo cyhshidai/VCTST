@@ -401,6 +401,8 @@ def cmd_status(args) -> int:
     if summary:
         print(f"run     : {run_dir}")
         print(f"engine  : {summary.get('engine')}")
+        if summary.get("tangent"):
+            print(f"tangent : {summary['tangent']}")
         print(f"status  : {'converged' if summary.get('converged') else 'not converged'}"
               f" after {summary.get('steps')} steps")
         print(f"barrier : {summary['barrier_eV']:.4f} eV "
@@ -421,6 +423,8 @@ def cmd_status(args) -> int:
     if state:
         print(f"run     : {run_dir}")
         print(f"progress: step {state.get('step')} of an unfinished run")
+        if state.get("tangent"):
+            print(f"tangent : {state['tangent']}")
         print(f"resume  : vcneb run <config> --restart")
         return 0
     raise VcnebError(f"{run_dir} does not look like a vcneb run directory")

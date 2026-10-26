@@ -1019,6 +1019,7 @@ run/
 ```json
 {
   "engine": "abacus",
+  "tangent": "improved",
   "converged": true,
   "steps": 214,
   "kpts": [8, 5, 3],
@@ -1049,6 +1050,8 @@ run/
 * `barrier_eV = max(E) − E[0]`，`reverse_barrier_eV = max(E) − E[-1]`；
   设了 `neb.pressure` 时这里的 `E` 全是焓 `H = E + P·V`；
 * `kpts` 是那条"全程冻结"的网格（`calc.gamma: true` 时是字符串 `"gamma"`）；
+* `tangent` 是这次实际用的路径切向（`improved` / `central`），`state.json` 里也存了一份，
+  `vcneb status` 会打印出来 —— 续算换了算法时能一眼看出跑的是哪一个；
 * 两个 `final_max_force_*` 只有收敛时才有；
 * `image_max` 是能量最高的图号。它等于 0 或最后一张，说明**这条路径上没有
   鞍点**（端点自己最高），此时 `barrier_eV` 约等于 0。

@@ -268,7 +268,8 @@ class Config:
             f"workdir      : {self.workdir}",
             f"engine       : {c.engine}   command: {c.command or '-'}",
             f"images       : {n.images} movable "
-            f"(+2 endpoints), interpolation={n.interpolation}",
+            f"(+2 endpoints), interpolation={n.interpolation}, "
+            f"tangent={n.get('tangent') or 'improved'}",
             f"variable cell: {n.variable_cell}   spring_k={n.spring_k}   "
             f"f_th={n.f_th} eV/A",
             f"max_steps    : {n.max_steps}   dt={n.dt}   "
