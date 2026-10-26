@@ -1,0 +1,49 @@
+# Li bcc -> fcc (Bain path) with Quantum ESPRESSO.
+# A single atom per cell, so this is cheap enough to test on a laptop.
+#   vcneb doctor examples/qe_li.yaml && vcneb run examples/qe_li.yaml
+project:
+  name: li_bcc_to_fcc
+  workdir: ./runs/qe_li
+
+structure:
+  build_initial:
+    formula: Li
+    crystal: bcc
+    a: 3.49
+  build_final:
+    formula: Li
+    crystal: fcc
+    a: 4.42
+
+calc:
+  engine: qe
+  command: pw.x                 # or: mpirun -np 4 pw.x
+  pseudo_dir: /path/to/pseudos  # folder containing the UPF below
+  pseudopotentials:
+    Li: Li.upf
+  timeout: 1800
+  kpts: [8, 8, 8]
+  params:
+    ecutwfc: 40
+    ecutrho: 320
+    occupations: smearing
+    smearing: marzari-vanderbilt     # or methfessel-paxton; avoid gauss for VC-NEB
+    degauss: 0.02
+    conv_thr: 1.0e-8
+
+neb:
+  images: 5
+  interpolation: linear        # only one atom, so IDPP cannot help
+  variable_cell: true
+  spring_k: 0.1
+  f_th: 0.05
+  max_steps: 100
+  dt: 0.1
+  max_step: 0.1
+  cell_max_step: 0.02
+  climbing_image: true
+  relax_endpoints: true
+  endpoint_fmax: 0.02
+
+output:
+  plot: true

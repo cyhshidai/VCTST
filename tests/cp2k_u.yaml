@@ -1,0 +1,45 @@
+# doctor fixture: CP2K with UKS + DFT+U + Mulliken (Ni fcc -> hcp-ish path)
+project:
+  name: ni_u_doctor
+  workdir: ./runs/ni_u
+
+structure:
+  build_initial:
+    formula: Ni
+    crystal: fcc
+    a: 3.52
+  build_final:
+    formula: Ni
+    crystal: bcc
+    a: 2.80
+
+calc:
+  engine: cp2k
+  command: /home/sob/cp2k/install/bin/cp2k.popt
+  data_dir: /home/sob/cp2k/data
+  kpts: [6, 6, 6]
+  params:
+    basis_set: {Ni: DZVP-MOLOPT-SR-GTH-q18}
+    potential: {Ni: GTH-PBE-q18}
+    xc: PBE
+    cutoff: 600
+    rel_cutoff: 60
+    eps_scf: 1.0e-6
+    smearing: true
+    smearing_method: marzari_vanderbilt
+    smearing_sigma: 0.05
+    added_mos: 10
+    uks: true
+    multiplicity: 3
+    hubbard_u: {Ni: 4.0}
+    hubbard_l: 2
+    mulliken: true
+
+neb:
+  images: 4
+  variable_cell: true
+  f_th: 0.05
+  max_steps: 20
+
+output:
+  plot: true

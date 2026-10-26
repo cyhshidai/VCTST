@@ -1,0 +1,49 @@
+# --- python -------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# --- vcneb run output (everything the tool writes itself) ----------------
+run/
+run_*/
+runs/
+examples/runs/
+state.json
+history.jsonl
+summary.json
+barrier.csv
+barrier.png
+band.traj
+config.resolved.yaml
+endpoint_initial.vasp
+endpoint_final.vasp
+images/
+logs/
+
+# --- engine scratch ------------------------------------------------------
+espresso.pwo
+espresso.pwi
+cp2k.out
+cp2k.inp
+*.save/
+ABACUS*
+
+# --- local scratch / dev ------------------------------------------------
+tmp/
+ase_sort.dat
+*.log
+nohup.out
+
+# --- editors / OS --------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

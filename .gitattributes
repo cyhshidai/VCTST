@@ -1,0 +1,6 @@
+# 全部文本文件统一 LF：仓库挂在 /mnt/e（WSL 的 drvfs）上也一样，
+# 别人在 Windows 上 clone 不会把 .sh 变成 CRLF（带 CRLF 的 bash 脚本会直接跑不起来）。
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary

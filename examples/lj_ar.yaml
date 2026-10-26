@@ -1,0 +1,37 @@
+# Workflow check that needs no DFT code at all: solid Ar, fcc(111) ABC stacking
+# -> hcp(111) ABA stacking (a stacking-fault shuffle), described with
+# Lennard-Jones.  Runs in a few seconds.
+#   vcneb run examples/lj_ar.yaml
+# Both endpoints use the same 6-atom cell; only the top layer slides from the
+# "C" site to the "A" site, so the barrier is a real (small) saddle point and
+# not an artefact of the cell interpolation.
+project:
+  name: ar_111_stacking_lj
+  workdir: ./runs/lj_ar
+
+structure:
+  initial: ./structures/ar_fcc111.vasp
+  final: ./structures/ar_hcp111.vasp
+
+calc:
+  engine: lj
+  params:
+    epsilon: 0.0104      # eV
+    sigma: 3.405         # Angstrom
+
+neb:
+  images: 5
+  interpolation: idpp
+  variable_cell: true
+  spring_k: 0.1
+  f_th: 0.01
+  max_steps: 400
+  dt: 0.1
+  max_step: 0.1
+  cell_max_step: 0.01
+  climbing_image: true
+  relax_endpoints: true
+  endpoint_fmax: 0.01
+
+output:
+  plot: true

@@ -1,0 +1,53 @@
+# Same Li bcc -> fcc path, but with CP2K (cp2k.popt, file based).
+# Li is a metal: smearing must be on, otherwise the SCF does not converge.
+project:
+  name: li_bcc_to_fcc_cp2k
+  workdir: ./runs/cp2k_li
+
+structure:
+  build_initial:
+    formula: Li
+    crystal: bcc
+    a: 3.49
+  build_final:
+    formula: Li
+    crystal: fcc
+    a: 4.42
+
+calc:
+  engine: cp2k
+  command: mpirun -np 4 cp2k.popt
+  data_dir: /path/to/cp2k/data     # holds BASIS_MOLOPT / GTH_POTENTIALS
+  timeout: 1800
+  kpts: [8, 8, 8]
+  params:
+    xc: PBE
+    cutoff: 400
+    rel_cutoff: 50
+    basis_set: DZVP-MOLOPT-SR-GTH
+    potential: GTH-PBE-q3
+    smearing: true
+    # marzari_vanderbilt / methfessel_paxton are the right choice for VC-NEB:
+    # their width is a numerical tool, while fermi_dirac is a real electronic
+    # temperature whose -TS term leaks into the barrier.
+    smearing_method: marzari_vanderbilt
+    smearing_sigma: 0.05        # eV
+    added_mos: 8
+    eps_scf: 1.0e-7
+
+neb:
+  images: 5
+  interpolation: linear
+  variable_cell: true
+  spring_k: 0.1
+  f_th: 0.05
+  max_steps: 100
+  dt: 0.1
+  max_step: 0.1
+  cell_max_step: 0.02
+  climbing_image: true
+  relax_endpoints: true
+  endpoint_fmax: 0.02
+
+output:
+  plot: true

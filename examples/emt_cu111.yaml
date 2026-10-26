@@ -1,0 +1,36 @@
+# Workflow check with a real (fast) potential: Cu, fcc(111) ABC -> hcp(111) ABA
+# stacking shuffle, i.e. the classic stacking-fault ("gamma surface") path.
+# Runs in a few seconds and gives a meaningful barrier (~0.44 eV per cell).
+#   vcneb run examples/emt_cu111.yaml
+# Structures: python3 examples/make_111_stack.py Cu 3.61
+#
+# The cell is kept fixed here on purpose: a six-atom slab with a fully free
+# cell is extremely floppy and the band can reach hcp by shearing the cell
+# instead of by the shuffle, which makes the run slow to converge.  See
+# examples/lj_ar.yaml for a run with variable_cell: true.
+project:
+  name: cu_111_stacking_emt
+  workdir: ./runs/emt_cu
+
+structure:
+  initial: ./structures/cu_fcc111.vasp
+  final: ./structures/cu_hcp111.vasp
+
+calc:
+  engine: emt
+
+neb:
+  images: 5
+  interpolation: idpp
+  variable_cell: false
+  spring_k: 0.1
+  f_th: 0.01
+  max_steps: 300
+  dt: 0.1
+  max_step: 0.1
+  climbing_image: true
+  relax_endpoints: true
+  endpoint_fmax: 0.01
+
+output:
+  plot: true
